@@ -1,56 +1,60 @@
 #include "marathon.h"
 
-void readData(std::string names[], double miles[][NUM_DAYS], std::ifstream& inFile) {
+struct Runner {
+    std::string name;
+    double miles[NUM_DAYS];
+    double total;
+    double average;
+};
+
+void readData(Runner runners[], std::ifstream& inFile) {
     for (int i = 0; i < NUM_RUNNERS; i++) {
-        inFile >> names[i];
+        inFile >> runners[i].name;
         for (int j = 0; j < NUM_DAYS; j++) {
-            inFile >> miles[i][j];
+            inFile >> runners[i].miles[j];
         }
     }
 }
 
-void calculateTotalsAndAverages(const double miles[][NUM_DAYS], double totals[], double averages[]) {
+void calculateTotalsAndAverages(Runner runners[]) {
     for (int i = 0; i < NUM_RUNNERS; i++) {
-        totals[i] = 0;
+        runners[i].total = 0;
         for (int j = 0; j < NUM_DAYS; j++) {
-            totals[i] += miles[i][j];
+            runners[i].total += runners[i].miles[j];
         }
-        averages[i] = totals[i] / NUM_DAYS;
+        runners[i].average = runners[i].total / NUM_DAYS;
     }
 }
 
-void printResults(const std::string names[], const double miles[][NUM_DAYS], const double totals[], const double averages[]) {
+void printResults(const Runner runners[]) {
     std::cout << std::left << std::setw(10) << "Name";
     for (int i = 1; i <= NUM_DAYS; i++) {
         if (i == 4) { // Apply additional spacing starting from Day 4
-            std::cout << std::right << std::setw(8) << "Day" << i; // Increase setw for Day 4 and beyond
+            std::cout << std::right << std::setw(7) << "Day" << i; // Increase setw for Day 4 and beyond
         }
         else {
-            std::cout << std::right << std::setw(6) << "Day" << i;
+            std::cout << std::right << std::setw(5) << "Day" << i;
         }
     }
-    std::cout << std::right << std::setw(12) << "Total" << std::setw(12) << "Average" << std::endl; // Adjust spacing for Total and Average
+    std::cout << std::right << std::setw(10) << "Total" << std::setw(12) << "Average" << std::endl; // Adjust spacing for Total and Average
 
     for (int i = 0; i < NUM_RUNNERS; i++) {
-        std::cout << std::left << std::setw(10) << names[i];
+        std::cout << std::left << std::setw(10) << runners[i].name;
         for (int j = 0; j < NUM_DAYS; j++) {
             if (j >= 3) { // Adjust spacing starting from the data of Day 4
-                std::cout << std::right << std::setw(8) << std::fixed << std::setprecision(0) << miles[i][j];
+                std::cout << std::right << std::setw(7) << std::fixed << std::setprecision(0) << runners[i].miles[j];
             }
             else {
-                std::cout << std::right << std::setw(6) << std::fixed << std::setprecision(0) << miles[i][j];
+                std::cout << std::right << std::setw(5) << std::fixed << std::setprecision(0) << runners[i].miles[j];
             }
         }
-        std::cout << std::right << std::setw(12) << std::fixed << std::setprecision(0) << totals[i]
-            << std::setw(12) << std::fixed << std::setprecision(2) << averages[i] << std::endl;
+        std::cout << std::right << std::setw(10) << std::fixed << std::setprecision(0) << runners[i].total
+            << std::setw(12) << std::fixed << std::setprecision(2) << runners[i].average << std::endl;
     }
 }
 
 int main() {
-    std::string runnerNames[NUM_RUNNERS];
-    double milesPerDay[NUM_RUNNERS][NUM_DAYS];
-    double totalMiles[NUM_RUNNERS];
-    double averageMiles[NUM_RUNNERS];
+    Runner runners[NUM_RUNNERS];
 
     std::ifstream inFile("runners.txt");
     if (!inFile) {
@@ -58,11 +62,11 @@ int main() {
         return 1;
     }
 
-    readData(runnerNames, milesPerDay, inFile);
+    readData(runners, inFile);
     inFile.close();
 
-    calculateTotalsAndAverages(milesPerDay, totalMiles, averageMiles);
-    printResults(runnerNames, milesPerDay, totalMiles, averageMiles);
+    calculateTotalsAndAverages(runners);
+    printResults(runners);
 
     return 0;
 }
